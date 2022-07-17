@@ -2,7 +2,7 @@ from msilib.schema import AdminExecuteSequence
 from time import sleep
 from types import NoneType
 import interactions
-from Credentials import Bot_Token
+from bot_token import Bot_Token
 
 Client = interactions.Client(token=Bot_Token, intents=interactions.Intents.ALL)
 
