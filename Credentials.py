@@ -1,8 +1,1 @@
-###################################
-# CREDENZIALI DEL BOT
-# INSERIRE CON ATTENZIONE
-###################################
-
-Bot_Token = "OTk3MjIxODI5NDAxOTExMzI3.GIhT2v.-cgXaNG4zw1XMb8N6wIRiB0DypVIaL1sEU7btY"
-
-
+Bot_Token = "OTk3MjIxODI5NDAxOTExMzI3.GR9ku8.id_X6swZltrH8iSDM58MVKWoNbDh7pYIcb3nf0"
