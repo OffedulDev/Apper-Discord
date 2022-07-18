@@ -1,4 +1,3 @@
-from click import option
 from Utility import *
 import interactions
 
@@ -31,12 +30,52 @@ _ReviewEmbed = Embed(title="Application Review 🔋",
                     description="Please review the application and the fields that you provided. Make sure that it all fits your needs and then press the Green button, otherwhise just press the red button and try again.",
                     color=colors.magenta)
 
-async def CreateApplication(ctx, options):
-    appname = options['appname']
-    app_name = appname
-    fields = [options['field0'], options['field1'], options['field2'], options['field3'], options['field4']]
+@Client.command(
+    name="create",
+    description="Create a new application.",
+    options=[
+        interactions.Option(
+            name="appname",
+            description="The name of the application",
+            required=True,
+            type=interactions.OptionType.STRING
+        ),
+        interactions.Option(
+            name="field0",
+            description="Field of the application",
+            required=True,
+            type=interactions.OptionType.STRING
+        ),
+        interactions.Option(
+            name="field1",
+            description="Field of the application",
+            required=True,
+            type=interactions.OptionType.STRING
+        ),
+        interactions.Option(
+            name="field2",
+            description="Field of the application",
+            required=True,
+            type=interactions.OptionType.STRING
+        ),
+        interactions.Option(
+            name="field3",
+            description="Field of the application",
+            required=True,
+            type=interactions.OptionType.STRING
+        ),
+        interactions.Option(
+            name="field4",
+            description="Field of the application",
+            required=True,
+            type=interactions.OptionType.STRING
+        )
+    ]
+)
+async def CreateApplication(ctx, appname, field0, field1, field2, field3, field4):
+    fields = [field0, field1, field2, field3, field4]
     async def confirmCreation(ctx):
-        App = Application(guild=ctx.get_guild().id, app_name=app_name, app_fields=fields)
+        App = Application(guild=0, app_name=appname, app_fields=fields)
         Applications.append(App)
 
         await ctx.send(embeds=_SuccessEmbed.embed)
@@ -47,14 +86,31 @@ async def CreateApplication(ctx, options):
         return
 
     _ActionRow = ActionRow()
-    _ActionRow.add_button(callback=discardCreation, label="Discard ❌", custom_id="discard" + ctx.get_guild().id, style=interactions.ButtonStyle.DANGER)
-    _ActionRow.add_button(callback=confirmCreation, label="Confirm ✅", custom_id="accept" + ctx.get_guild().id, style=interactions.ButtonStyle.DANGER)
-    await ctx.send(embeds=_ReviewEmbed.embed, components=_ActionRow)
+    _ActionRow.add_button(callback=discardCreation, label="Discard ❌", custom_id="discard", style=interactions.ButtonStyle.DANGER)
+    _ActionRow.add_button(callback=confirmCreation, label="Confirm ✅", custom_id="accept", style=interactions.ButtonStyle.SUCCESS)
+    await ctx.send(embeds=_ReviewEmbed.embed, components=_ActionRow.build_row())
 
+@Client.command(
+    name="sendappplication",
+    description="Send appplication",
+    options=[
+        interactions.Option(
+            name="appname",
+            required=True,
+            description="The name of the application.",
+            type=interactions.OptionType.STRING
+        )
+    ]
+)
+async def sendappplication(ctx, appname):
+    searchApp = None
+    for app in Applications:
+        if app.app_name == appname:
+            searchApp = app
+            break
 
-CreateCommand = Command(Name="create", Desc="Create a new application.", Admin=True, CallBack=CreateApplication)
-CreateCommand.add_option(Name="appname", Desc="Name of the application.", Required=True)
-for i in range(5): CreateCommand.add_option(Name=f"field{i}", Desc=f"Field of the Application. {i}" , Required=True)
-CreateCommand.build_command()
+    if searchApp == None: await ctx.send("Bad argument."); return
+    await searchApp.sendActionRow(ctx)
+    return
 
 Client.start()

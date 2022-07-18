@@ -1,5 +1,4 @@
 # Utility Module
-from code import interact
 import interactions
 from bot_token import Bot_Token
 
@@ -51,11 +50,10 @@ class Embed:
         self.embed.add_field(name=name, value=value, inline=inline)
 
 class Modal:
-    def __init__(self, title, custom_id, callback=None):
+    def __init__(self, title, custom_id):
         self.title = title
         self.custom_id = custom_id
         self.components = []
-        self.callback = callback
 
     def add_textinput(self, style=interactions.TextStyleType.SHORT, label="None", custom_id="None", min_length=0, max_length=100):
         self.components.append(interactions.TextInput(
@@ -68,9 +66,6 @@ class Modal:
         )       
 
     def build_modal(self):
-        @Client.modal(self.custom_id)
-        async def _answer(ctx, *answers):
-            await self.callback(ctx, answers)
 
         return interactions.Modal(
             title=self.title,
@@ -95,50 +90,26 @@ class ActionRow:
 
     def build_row(self):
         return interactions.ActionRow(components=self.actions)
-    
-class Command:
-    def __init__(self, CallBack, Name="", Desc="", Admin=False):
-        self.name = Name
-        self.desc = Desc
-        self.options = []
-        self.callback = CallBack
-        self.admin = Admin
-
-    def add_option(self, Name, Desc, Required, Option_Type=interactions.OptionType.STRING):
-        self.options.append(interactions.Option(
-                name=Name,
-                description=Desc,
-                type=Option_Type,
-                requried=Required
-            )
-        )
-
-    def build_command(self):
-        callback = self.callback
-        @Client.command(
-            name=self.name,
-            description=self.desc,
-            options=self.options,
-            default_member_permissions=interactions.Permissions.ADMINISTRATOR if self.admin else interactions.Permissions.SPEAK
-        )
-        async def execute(ctx, **kargs):
-            await callback(ctx, kargs)
 
 ## Bot Classes 
-
 class Application:
     def __init__(self, guild, app_name, app_fields):
         self.app_name = app_name
         self.app_fields = app_fields
         self.guild = guild
         
-        async def ModalCallback(ctx, answers):
-            for answer in answers:
-                await ctx.send(answer)
+        @Client.modal(self.app_name)
+        async def ModalCallback(ctx, field1, field2, field3, field4, field5):
+            _ResEmbed = Embed(title="Application Recived from " + ctx.author.username + "🎭", description="Recived application, review the parameters.", color=colors.dark_gold)
 
-        self.AppModal = Modal(title=self.app_name, custom_id=self.app_name.lower(), callback=ModalCallback)
-        for field in app_fields: self.AppModal.add_textinput(label=field, custom_id=field.lower())
-            
+            fields = [field1, field2, field3, field4, field5]
+            for field in fields:
+                _ResEmbed.add_field(name="Question #" + str(fields.index(field)), value=field, inline=False)
+
+        AppModal = Modal(title=self.app_name, custom_id=self.app_name.lower())
+        for field in app_fields: AppModal.add_textinput(label=field, custom_id=str(app_fields.index(field)))
+        self.AppModal = AppModal.build_modal()
+
     async def sendActionRow(self, ctx):
         StartEmbed = Embed(title="Starting Application ✅", 
                            description="You should be prompted with your application in a moment. Thanks for choosing Apper!", 
@@ -148,18 +119,18 @@ class Application:
                                description="Press the button below to start this application, under here you can find every question asked in the application.", 
                                color=colors.teal)
 
-        for Field in self.app_fields: ActionRowEmbed.add_field(name=self.app_field.index(Field), value=Field, inline=True)
+        for Field in self.app_fields: ActionRowEmbed.add_field(name="Question #" + str(self.app_fields.index(Field)), value=Field, inline=False)
 
         async def startApplication(ctx):
-            await ctx.send(embeds=StartEmbed.embed)
             await ctx.popup(self.AppModal)
+            await ctx.send(embeds=StartEmbed.embed)
 
         _ActionRow = ActionRow()
         _ActionRow.add_button(callback=startApplication, 
                               label="Start Application (" + self.app_name + ")", 
                               custom_id=self.app_name.lower())
 
-        await ctx.send(embeds=ActionRowEmbed.embed, components=_ActionRow)
+        await ctx.send(embeds=ActionRowEmbed.embed, components=_ActionRow.build_row())
         
 
 
