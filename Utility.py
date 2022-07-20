@@ -66,7 +66,6 @@ class Modal:
         )       
 
     def build_modal(self):
-
         return interactions.Modal(
             title=self.title,
             custom_id=self.custom_id,
@@ -98,13 +97,14 @@ class Application:
         self.app_fields = app_fields
         self.guild = guild
         
-        @Client.modal(self.app_name)
+        @Client.modal(self.app_name.lower())
         async def ModalCallback(ctx, field1, field2, field3, field4, field5):
-            _ResEmbed = Embed(title="Application Recived from " + ctx.author.username + "🎭", description="Recived application, review the parameters.", color=colors.dark_gold)
+            _ResEmbed = Embed(title="Application Recived from " + ctx.author.name + " 🎭", description="Recived application, review the parameters.", color=colors.dark_gold)
 
             fields = [field1, field2, field3, field4, field5]
             for field in fields:
                 _ResEmbed.add_field(name="Question #" + str(fields.index(field)), value=field, inline=False)
+            await ctx.send(embeds=_ResEmbed.embed)
 
         AppModal = Modal(title=self.app_name, custom_id=self.app_name.lower())
         for field in app_fields: AppModal.add_textinput(label=field, custom_id=str(app_fields.index(field)))

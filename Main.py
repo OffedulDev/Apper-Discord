@@ -73,18 +73,20 @@ _ReviewEmbed = Embed(title="Application Review 🔋",
     ]
 )
 async def CreateApplication(ctx, appname, field0, field1, field2, field3, field4):
+    fields = []
     fields = [field0, field1, field2, field3, field4]
     async def confirmCreation(ctx):
         App = Application(guild=0, app_name=appname, app_fields=fields)
         Applications.append(App)
 
-        await ctx.send(embeds=_SuccessEmbed.embed)
+        await ctx.edit(embeds=_SuccessEmbed.embed, components=[])
         return
         
     async def discardCreation(ctx):
-        await ctx.send("Ignoring changes, discarding application.")
+        await ctx.edit("Ignoring changes, discarding application.", components=[])
         return
 
+    for field in fields: _ReviewEmbed.add_field(name=f"Question #{fields.index(field)}", value=field, inline=False)
     _ActionRow = ActionRow()
     _ActionRow.add_button(callback=discardCreation, label="Discard ❌", custom_id="discard", style=interactions.ButtonStyle.DANGER)
     _ActionRow.add_button(callback=confirmCreation, label="Confirm ✅", custom_id="accept", style=interactions.ButtonStyle.SUCCESS)
@@ -102,7 +104,7 @@ async def CreateApplication(ctx, appname, field0, field1, field2, field3, field4
         )
     ]
 )
-async def sendappplication(ctx, appname):
+async def SendAppplication(ctx, appname):
     searchApp = None
     for app in Applications:
         if app.app_name == appname:
